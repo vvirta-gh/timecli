@@ -1,41 +1,7 @@
 import argparse
 import json
 from pathlib import Path
-
-DATA_FILE = Path(__file__).parent.parent / "data" / "tasks.json"
-
-class TaskManager:
-    def __init__(self):
-        self.tasks = self.load_tasks()
-
-    def load_tasks(self):
-        if DATA_FILE.exists():
-            with open(DATA_FILE, "r") as f:
-                return json.load(f)
-            return []
-        return []
-    
-    def save_tasks(self):
-        DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
-        with open(DATA_FILE, "w") as f:
-            json.dump(self.tasks, f, indent=2)
-        return None
-    
-    def add_task(self, description):
-        self.tasks.append({"description": description})
-        self.save_tasks()
-        print(f"Added task: {description}")
-        return None
-    
-    def list_tasks(self):
-        if not self.tasks:
-            print("No tasks found.")
-        else:
-            for idx, task in enumerate(self.tasks, 1):
-                print(f"{idx}. {task['description']}")
-        return None
-    
-    
+from taskmanager import TaskManager
 
 def main():
     parser = argparse.ArgumentParser(description="Task Manager")
