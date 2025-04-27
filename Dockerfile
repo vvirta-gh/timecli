@@ -21,8 +21,17 @@ RUN pip install --user --no-cache-dir -r requirements.txt
 
 COPY /app /app/
 
+
+
+###############
+# Stage 2: TESTING
+###############
+FROM build AS testing
+RUN pytest
+
+
 ##################
-# Stage 2: RUNTIME
+# Stage 3: RUNTIME
 ##################
 FROM python:3.13-slim-bookworm AS runtime
 
