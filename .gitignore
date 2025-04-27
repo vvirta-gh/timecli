@@ -1,0 +1,39 @@
+# Python-related files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+*.venv
+*.egg
+*.egg-info/
+dist/
+build/
+*.cpython*
+
+# Virtual environment
+/.venv/
+
+# Docker-related files
+*.log
+docker-compose.override.yml
+
+# Test-related files
+.pytest_cache/
+.coverage
+htmlcov/
+tests/__pycache__/
+
+# IDE and editor files
+.vscode/
+*.swp
+*.swo
+*.idea/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Task data
+/data/tasks.json
+
