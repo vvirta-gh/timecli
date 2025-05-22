@@ -1,9 +1,9 @@
 import argparse
 import json
 from pathlib import Path
-from taskmanager import TaskManager
+from app.taskmanager import TaskManager
 
-def main():
+def cli():
     parser = argparse.ArgumentParser(description="Task Manager")
     subparsers = parser.add_subparsers(dest="command")
     task_manager = TaskManager()
@@ -22,4 +22,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    cli()

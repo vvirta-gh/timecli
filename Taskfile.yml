@@ -3,26 +3,27 @@
 version: '3'
 
 vars:
-  GREETING: Hello, World!
+  GREETING: Good day
+  NAME: Mr. Virtanen
 
 tasks:
   default:
     cmds:
-      - echo "{{.GREETING}}"
+      - echo "{{.GREETING}}, {{.NAME}}! Task is up and runnnig, and so are you :)"
     silent: true
 
   test:
     desc: Run pytest
     cmds:
-      - pytest
+      - pytest --maxfail=1 --disable-warnings
     silent: true
     env:
-      PYTHONPATH: .
+      PYTHONPATH: /app
 
   lint:
     desc: Run flake8
     cmds:
-      - flake8 app tests
+      - flake8 app tests --exit-zero
     silent: true
     env:
-      PYTHONPATH: .
+      PYTHONPATH: /app

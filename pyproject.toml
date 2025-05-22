@@ -8,3 +8,10 @@ dependencies = [
     "flake8>=7.2.0",
     "go-task-bin>=3.43.3",
 ]
+
+[project.scripts]
+timecli = "app.main:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
