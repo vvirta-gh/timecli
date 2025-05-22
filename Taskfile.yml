@@ -1,0 +1,28 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  GREETING: Hello, World!
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+
+  test:
+    desc: Run pytest
+    cmds:
+      - pytest
+    silent: true
+    env:
+      PYTHONPATH: .
+
+  lint:
+    desc: Run flake8
+    cmds:
+      - flake8 app tests
+    silent: true
+    env:
+      PYTHONPATH: .
