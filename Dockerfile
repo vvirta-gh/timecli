@@ -4,47 +4,74 @@
 ##################
 FROM python:3.13-slim-bookworm AS build
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     build-essential \
-    gcc \
-    g++ \
-    libfreetype6-dev \
-    libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Install uv
+RUN curl -Ls https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
+
+# Set working directory
 WORKDIR /app
 
-COPY requirements.txt .
+# Copy deps
+COPY pyproject.toml uv.lock ./
 
-RUN python -m venv /.venv
-RUN pip install --user --no-cache-dir -r requirements.txt
+# Copy application code from working directory into application's workdir
+COPY . .
 
-COPY /app /app/
+# Install Task CLI (Taskfile.dev)
+RUN curl -sSL https://taskfile.dev/install.sh | sh \
+  && mv ./bin/task /usr/local/bin/task \
+  && rm -rf ./bin
+# Check Task installation
+RUN task
 
+### 2. TESTS AND LINTING
+FROM python:3.13-slim-bookworm AS test
 
+# Aseta työskentelyhakemisto ja ympäristömuuttujat globaalisti
+WORKDIR /app
+ENV PYTHONPATH=/app
 
-###############
-# Stage 2: TESTING
-###############
-FROM build AS testing
-RUN pytest
+# Muut COPY-komennot pysyvät ennallaan
+COPY --from=build /app /app
+COPY --from=build /app/tests /tests
+COPY --from=build /app/Taskfile.yml ./
+COPY --from=build /root/.local/bin/uv /usr/local/bin/uv
+COPY --from=build /usr/local/bin/task /usr/local/bin/task
+COPY --from=build /app/pyproject.toml /app/uv.lock ./
 
+# Asenna tarvittavat työkalut
+RUN uv pip install --no-cache-dir pytest flake8
 
-##################
-# Stage 3: RUNTIME
-##################
-FROM python:3.13-slim-bookworm AS runtime
+# Aja Task-komennot
+RUN task
+RUN task test
+RUN task lint
 
-COPY --from=build /.venv /.venv
-ENV PATH="/.venv/bin:$PATH"
+########################
+# 3. Production stage
+########################
+FROM python:3.12-slim-bookworm AS prod
 
+# Määritä ympäristömuuttujat
+ENV VIRTUAL_ENV=/app/.venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Määritä työskentelyhakemisto
 WORKDIR /app
 
-COPY --from=build /root/.local /root/.local
-COPY --from=build /app /app/
+# Kopioi virtuaaliympäristö ja sovelluskoodi build-vaiheesta
+COPY --from=build /app/.venv /app/.venv
+COPY --from=build /app /app
 
-CMD ["python", "main.py"]
+# Asenna paketit, jotta skripti voi toimia
+RUN pip install --no-cache-dir .
 
-
-
+# Määritä oletuskomennot
+ENTRYPOINT [ "timecli" ]
 
