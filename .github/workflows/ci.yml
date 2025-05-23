@@ -7,35 +7,25 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  docker_build_and_test: # Renamed job for clarity
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      
-      - name: Install uv
+      - name: Build and Test Docker image (test stage)
         run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-      
-      - name: Sync dependencies with uv
+          # This command builds up to your 'test' stage in the Dockerfile.
+          # If 'task test' or 'task lint' (which run pytest and flake8)
+          # fail within that stage, this docker build command will fail,
+          # causing the CI job to fail.
+          docker build --target test -t timecli-test-env .
+
+      - name: Build Production Docker image
+        if: success() # Only build the production image if the test stage build succeeded
         run: |
-          uv sync
-      
-      - name: Run pytest
-        run: |
-          pytest
-      
-      - name: Lint with flake8
-        run: |
-          uv run flake8 . --exit-zero
-      
-      - name: Builder Docker image
-        run: |
-          docker build -t timecli:latest .
+          # This builds the final 'production' stage image.
+          # If 'production' is the last stage in your Dockerfile,
+          # you can also use: docker build -t timecli:latest .
+          docker build --target production -t timecli:latest .
